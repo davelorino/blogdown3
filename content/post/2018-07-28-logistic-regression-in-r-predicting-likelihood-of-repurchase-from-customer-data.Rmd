@@ -1,0 +1,47 @@
+---
+title: Predicting the Amount of Time Until Reorder Using Customer Transaction Data
+author: Davide Lorino
+date: '2018-07-28'
+slug: survival-analysis-in-r
+categories:
+  - machine learning
+  - predictive modelling
+tags:
+  - machine learning
+  - predictive modelling
+---
+
+In this post we will use Survival Analysis to predict the amount of time until a customer will repurchase. We will use the publicly available Telco customer dataset available on my github under the repo for this post. 
+
+```{r}
+survival_data <- read.csv("customer_transaction_data.csv")
+str(survival_data)
+```
+
+Our variables include "days since first purchase", "gender", "shopping cart value" (how much they spent on their first order), "voucher" (whether or not they used one), "returned" (whether or not they returned anything from their first order) and "bought again".
+
+A quick example here shows the difference between days since first purchase for customers who have yet to repurchase since their first order on the left and customers who have repurcahsed since their first order on the right.
+
+```{r}
+library(ggplot2)
+
+ggplot(survival_data) +
+  geom_histogram(aes(x = daysSinceFirstPurch, fill = factor(boughtAgain))) +
+  facet_grid( ~ boughtAgain) +
+  theme(legend.position = "none")
+```
+
+## Survival Curve Analysis by Kaplan-Meier
+
+Create a new column that holds a 'Survival' object. This will be the variable that we are predicting - the time until repurchase, measured in days.
+
+```{r}
+library(survival)
+
+# Create survival object
+survObj <- Surv(survival_data$daysSinceFirstPurch, survival_data$boughtAgain)
+
+str(survObj)
+```
+
+

@@ -12,12 +12,13 @@
     
     
     <item>
-      <title>Logistic Regression in R - Predicting Likelihood of Repurchase with Customer Data</title>
-      <link>/2018/07/28/logistic-regression-in-r-predicting-likelihood-of-repurchase-with-customer-data/</link>
+      <title>Predicting the Amount of Time Until Reorder Using Customer Transaction Data</title>
+      <link>/2018/07/28/survival-analysis-in-r/</link>
       <pubDate>Sat, 28 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/07/28/logistic-regression-in-r-predicting-likelihood-of-repurchase-with-customer-data/</guid>
-      <description></description>
+      <guid>/2018/07/28/survival-analysis-in-r/</guid>
+      <description>In this post we will use Survival Analysis to predict the amount of time until a customer will repurchase. We will use the publicly available Telco customer dataset available on my github under the repo for this post.
+survival_data &amp;lt;- read.csv(&amp;quot;customer_transaction_data.csv&amp;quot;) str(survival_data) ## &amp;#39;data.frame&amp;#39;: 5122 obs. of 6 variables: ## $ daysSinceFirstPurch: int 37 63 48 17 53 11 22 16 74 44 ... ## $ shoppingCartValue : num 33.4 31.</description>
     </item>
     
     <item>

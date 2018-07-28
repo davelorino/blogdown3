@@ -1,0 +1,50 @@
+---
+title: Predicting the Amount of Time Until Reorder Using Customer Transaction Data
+author: Davide Lorino
+date: '2018-07-28'
+slug: survival-analysis-in-r
+categories:
+  - machine learning
+  - predictive modelling
+tags:
+  - machine learning
+  - predictive modelling
+---
+
+
+
+<p>In this post we will use Survival Analysis to predict the amount of time until a customer will repurchase. We will use the publicly available Telco customer dataset available on my github under the repo for this post.</p>
+<pre class="r"><code>survival_data &lt;- read.csv(&quot;customer_transaction_data.csv&quot;)
+str(survival_data)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    5122 obs. of  6 variables:
+##  $ daysSinceFirstPurch: int  37 63 48 17 53 11 22 16 74 44 ...
+##  $ shoppingCartValue  : num  33.4 31.7 27.3 41.1 65.6 ...
+##  $ gender             : Factor w/ 2 levels &quot;female&quot;,&quot;male&quot;: 2 2 1 2 1 1 1 1 1 1 ...
+##  $ voucher            : int  0 1 0 0 0 0 0 1 0 0 ...
+##  $ returned           : int  0 0 0 0 0 0 0 0 0 0 ...
+##  $ boughtAgain        : int  0 1 0 1 0 1 1 1 0 1 ...</code></pre>
+<p>Our variables include “days since first purchase”, “gender”, “shopping cart value” (how much they spent on their first order), “voucher” (whether or not they used one), “returned” (whether or not they returned anything from their first order) and “bought again”.</p>
+<p>A quick example here shows the difference between days since first purchase for customers who have yet to repurchase since their first order on the left and customers who have repurcahsed since their first order on the right.</p>
+<pre class="r"><code>library(ggplot2)
+
+ggplot(survival_data) +
+  geom_histogram(aes(x = daysSinceFirstPurch, fill = factor(boughtAgain))) +
+  facet_grid( ~ boughtAgain) +
+  theme(legend.position = &quot;none&quot;)</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="/post/2018-07-28-logistic-regression-in-r-predicting-likelihood-of-repurchase-from-customer-data_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<div id="survival-curve-analysis-by-kaplan-meier" class="section level2">
+<h2>Survival Curve Analysis by Kaplan-Meier</h2>
+<p>Create a new column that holds a ‘Survival’ object. This will be the variable that we are predicting - the time until repurchase, measured in days.</p>
+<pre class="r"><code>library(survival)
+
+# Create survival object
+survObj &lt;- Surv(survival_data$daysSinceFirstPurch, survival_data$boughtAgain)
+
+str(survObj)</code></pre>
+<pre><code>##  &#39;Surv&#39; num [1:5122, 1:2]  37+  63   48+  17   53+  11   22   16   74+  44  ...
+##  - attr(*, &quot;dimnames&quot;)=List of 2
+##   ..$ : NULL
+##   ..$ : chr [1:2] &quot;time&quot; &quot;status&quot;
+##  - attr(*, &quot;type&quot;)= chr &quot;right&quot;</code></pre>
+</div>
