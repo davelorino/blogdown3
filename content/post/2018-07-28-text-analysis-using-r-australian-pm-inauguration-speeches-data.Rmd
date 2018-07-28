@@ -1,5 +1,5 @@
 ---
-title: 'Text Analysis Using R - Australian PM Inauguration Speeches Data '
+title: 'Text Analysis with visNetwork'
 author: Davide Lorino
 date: '2018-07-28'
 slug: text-analysis-using-r-australian-pm-inauguration-speeches-data
