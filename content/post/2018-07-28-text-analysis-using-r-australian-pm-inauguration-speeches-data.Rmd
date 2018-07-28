@@ -120,7 +120,7 @@ body_bigrams2 <- speeches %>%
      filter(!to %in% stop_words$word) %>%
      count(from, to, sort = TRUE) %>%
      rename(size = n) %>%
-     filter(size >= 10)
+     filter(size >= 17)
 ```
 
 ## Visualize the Word Pairs
