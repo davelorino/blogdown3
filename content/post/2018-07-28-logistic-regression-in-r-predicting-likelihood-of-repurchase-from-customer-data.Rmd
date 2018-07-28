@@ -44,4 +44,32 @@ survObj <- Surv(survival_data$daysSinceFirstPurch, survival_data$boughtAgain)
 str(survObj)
 ```
 
+Compute a Kaplan Meier regression with no covariate analysis (indicated by the 1 to the right of the tilde)
 
+```{r}
+fitKMSimple <- survfit(survObj ~ 1)
+print(fitKMSimple)
+```
+
+Plot the Kaplan Meier fit
+
+```{r}
+plot(fitKMSimple, conf.init = FALSE,
+     xlab = "Time since first purchase", ylab = "Survival function", main = "Survival Function")
+```
+
+The survival function plot shows likelihood of repurchase for first-time buyers over a period of time since their first purchase. There is a clear downward trend.
+
+Here we have not computed our Kaplan Meier fit to account for covariate linearity. For instance, when measuring the height of two plants over a two-year period, the coefficients of variables such as "sunlight" measured in minutes per day, and "soil_richness" measured in bacteria per mg would account for a certain percentage of the outcome variable, height_of_plant. 
+
+Covariate linearity defines the effect that one or more variables can have on each oter predictor variable in the dataset. If we introduce a third variable to the "height_of_plant" example from before, "daily_rainfall", and found that both plants had received completely different amounts of rain, then the percentage of the outcome variable (height_of_plant) as explained by the predictor variables ("sunlight" and "soil_richness") would adjust accordingly because now there is a percentage of the outcome variable being explained by "rainfall", and it may also be having an influence on the impact of the "soil_richness" and "sunlight" variables.
+
+Now we can compute our Kaplan Meier fit to account for covariate linearity.
+
+```{r}
+fitKMCov <- survfit(survObj ~ voucher, data = survival_data)
+
+plot(fitKMCov, lty = 2:3,
+xlab = "Time since first purchase", ylab = "Survival function", main = "Survival function")
+legend(90, .9, c("No", "Yes"), lty = 2:3)
+```

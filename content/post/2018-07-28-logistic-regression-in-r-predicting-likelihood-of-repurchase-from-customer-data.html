@@ -47,4 +47,34 @@ str(survObj)</code></pre>
 ##   ..$ : NULL
 ##   ..$ : chr [1:2] &quot;time&quot; &quot;status&quot;
 ##  - attr(*, &quot;type&quot;)= chr &quot;right&quot;</code></pre>
+<p>Compute a Kaplan Meier regression with no covariate analysis (indicated by the 1 to the right of the tilde)</p>
+<pre class="r"><code>fitKMSimple &lt;- survfit(survObj ~ 1)
+print(fitKMSimple)</code></pre>
+<pre><code>## Call: survfit(formula = survObj ~ 1)
+## 
+##       n  events  median 0.95LCL 0.95UCL 
+##    5122    3199      41      40      42</code></pre>
+<p>Plot the Kaplan Meier fit</p>
+<pre class="r"><code>plot(fitKMSimple, conf.init = FALSE,
+     xlab = &quot;Time since first purchase&quot;, ylab = &quot;Survival function&quot;, main = &quot;Survival Function&quot;)</code></pre>
+<pre><code>## Warning in plot.window(...): &quot;conf.init&quot; is not a graphical parameter</code></pre>
+<pre><code>## Warning in plot.xy(xy, type, ...): &quot;conf.init&quot; is not a graphical parameter</code></pre>
+<pre><code>## Warning in axis(side = side, at = at, labels = labels, ...): &quot;conf.init&quot; is
+## not a graphical parameter
+
+## Warning in axis(side = side, at = at, labels = labels, ...): &quot;conf.init&quot; is
+## not a graphical parameter</code></pre>
+<pre><code>## Warning in box(...): &quot;conf.init&quot; is not a graphical parameter</code></pre>
+<pre><code>## Warning in title(...): &quot;conf.init&quot; is not a graphical parameter</code></pre>
+<p><img src="/post/2018-07-28-logistic-regression-in-r-predicting-likelihood-of-repurchase-from-customer-data_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>The survival function plot shows likelihood of repurchase for first-time buyers over a period of time since their first purchase. There is a clear downward trend.</p>
+<p>Here we have not computed our Kaplan Meier fit to account for covariate linearity. For instance, when measuring the height of two plants over a two-year period, the coefficients of variables such as “sunlight” measured in minutes per day, and “soil_richness” measured in bacteria per mg would account for a certain percentage of the outcome variable, height_of_plant.</p>
+<p>Covariate linearity defines the effect that one or more variables can have on each oter predictor variable in the dataset. If we introduce a third variable to the “height_of_plant” example from before, “daily_rainfall”, and found that both plants had received completely different amounts of rain, then the percentage of the outcome variable (height_of_plant) as explained by the predictor variables (“sunlight” and “soil_richness”) would adjust accordingly because now there is a percentage of the outcome variable being explained by “rainfall”, and it may also be having an influence on the impact of the “soil_richness” and “sunlight” variables.</p>
+<p>Now we can compute our Kaplan Meier fit to account for covariate linearity.</p>
+<pre class="r"><code>fitKMCov &lt;- survfit(survObj ~ voucher, data = survival_data)
+
+plot(fitKMCov, lty = 2:3,
+xlab = &quot;Time since first purchase&quot;, ylab = &quot;Survival function&quot;, main = &quot;Survival function&quot;)
+legend(90, .9, c(&quot;No&quot;, &quot;Yes&quot;), lty = 2:3)</code></pre>
+<p><img src="/post/2018-07-28-logistic-regression-in-r-predicting-likelihood-of-repurchase-from-customer-data_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 </div>
