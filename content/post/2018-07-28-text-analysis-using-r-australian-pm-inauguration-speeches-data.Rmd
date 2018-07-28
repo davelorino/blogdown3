@@ -31,13 +31,17 @@ library(dplyr)
   
 ## Connecting to the API
 
+Running the line below will pull the speeches data directly from the API of the Museum of Australian Democracy 
+
 ```{r}
 speeches <- fromJSON("https://electionspeeches.moadoph.gov.au/api/speeches.json")
 ```
 
 Call str() on the resulting 'speeches' data.frame - i'm not going to print the output here because it's really large.
 
-Load the stringr package to join the 'candidate_name' variable into a 'Name_Surname' format instead of 'Name Surname' (R just needs things to be a certain way sometimes) and strip the 12th column because it contains a really dense list of metadata that we aren't using. 
+## Cleaning the Data
+
+Load the stringr package to join the 'candidate_name' variable into a 'Name_Surname' format instead of 'Name Surname' (R doesn't like spaces in variable names - it can handle them but you have to start using 'single quotes' around the variables and it's a hassle).
 
 ```{r speeches}
 library(stringr)
@@ -56,9 +60,11 @@ And now let's remove that twelfth column in our dataset, it's just a big messy l
 speeches <- speeches[,-12]
 ```
 
-## Creating Helper Functions
+## More Cleaning - Creating Helper Functions
 
-Now that our dataset is looking a little tidier, we'll want to start cleaning that 'body' variable because it contains all of the speeches we'll be analyzing. For our purposes we'll want to:
+Now that our dataset is looking a little tidier, we'll want to start cleaning that 'body' variable because it contains all of the speeches we'll be analyzing. 
+
+For our purposes we'll want to:
 
   - strip the html embedded into the speeches data
   - make everything lowercase (otherwise we double up on words)
@@ -87,7 +93,7 @@ clean_this <- function(x){
 }
 ```
 
-Ok now let's use it.
+Ok now let's use it on the speeches data.
 
 ```{r}
 speeches2 <- clean_this(speeches$body)
@@ -99,20 +105,33 @@ Our text data should look a lot cleaner now... let's take a look.
 str(speeches2)
 ```
 
-## Tokens and Bigrams
+## Preparing the Data for visNetwork 
 
-Cool, now that we've cleaned our speeches we can start to analyze visualize them. Let's look at word pairs first.
+Cool, now that we've cleaned our speeches we can start to analyze visualize them. 
+
+Let's look at word pairs first. 
+
+Load the tidytext and tidyr libraries.
 
 ```{r}
 library(tidytext)
 library(tidyr)
 
+```
+
+Create a single_tokens variable that holds every individual word in the data ranked by count.
+
+```{r}
 single_tokens <- speeches %>%
   unnest_tokens(output = word, input = body) %>%
   anti_join(stop_words) %>%
   count(word) %>%
   rename(value = n)
+```
 
+Create body_bigrams2 - a variable that holds every individual pair of words, separated into "from" and "to" columns ranked by count. We'll trim this down to word pairs that appear greater than or equal to 17 times and we'll use dplyr and tidytext to filter out stopwords like "to", "in", "the" etc.
+
+```{r}
 body_bigrams2 <- speeches %>%
      unnest_tokens(bigram, body, token = "ngrams", n = 2) %>%
      separate(bigram, c("from", "to"), sep = " ") %>%
@@ -125,13 +144,19 @@ body_bigrams2 <- speeches %>%
 
 ## Visualize the Word Pairs
 
-Let's use our ngram and bigram data to make an interactive network graph of all of the most common word pairs in the history of Australian election speeches. 
+Let's use our single_tokens and body_bigrams2 data to make an interactive network graph of the most common word pairs in the history of Australian election speeches. 
 
-```{r}
+Load ggraph, igraph and DT.
+
+```{r echo = FALSE}
 library(ggraph)
 library(igraph)
 library(DT)
+```
 
+Create the nodes of the network.
+
+```{r}
 body_nodes <- tibble(id = unique(c(body_bigrams2$from, body_bigrams2$to)),
                         label = unique(c(body_bigrams2$from, body_bigrams2$to))) %>%
                 left_join(single_tokens, by = c(id = "word"))

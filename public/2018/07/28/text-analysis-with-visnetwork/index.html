@@ -59,7 +59,7 @@
 
   <article class="article">
     
-    <span class="article-duration">4 min read</span>
+    <span class="article-duration">5 min read</span>
     
 
     <h1 class="article-title">Text Analysis with visNetwork</h1>
@@ -98,8 +98,12 @@ library(dplyr)</code></pre>
 </div>
 <div id="connecting-to-the-api" class="section level2">
 <h2>Connecting to the API</h2>
+<p>Running the line below will pull the speeches data directly from the API of the Museum of Australian Democracy</p>
 <pre class="r"><code>speeches &lt;- fromJSON(&quot;https://electionspeeches.moadoph.gov.au/api/speeches.json&quot;)</code></pre>
 <p>Call str() on the resulting ‘speeches’ data.frame - i’m not going to print the output here because it’s really large.</p>
+</div>
+<div id="cleaning-the-data" class="section level2">
+<h2>Cleaning the Data</h2>
 <p>Load the stringr package to join the ‘candidate_name’ variable into a ‘Name_Surname’ format instead of ‘Name Surname’ (R just needs things to be a certain way sometimes) and strip the 12th column because it contains a really dense list of metadata that we aren’t using.</p>
 <pre class="r"><code>library(stringr)
 speeches$candidate_name &lt;- str_replace(speeches$candidate_name, &quot; &quot;, &quot;_&quot;)</code></pre>
@@ -108,9 +112,10 @@ speeches$candidate_name &lt;- str_replace(speeches$candidate_name, &quot; &quot;
 <p>And now let’s remove that twelfth column in our dataset, it’s just a big messy list of metadata that we aren’t even using</p>
 <pre class="r"><code>speeches &lt;- speeches[,-12]</code></pre>
 </div>
-<div id="creating-helper-functions" class="section level2">
-<h2>Creating Helper Functions</h2>
-<p>Now that our dataset is looking a little tidier, we’ll want to start cleaning that ‘body’ variable because it contains all of the speeches we’ll be analyzing. For our purposes we’ll want to:</p>
+<div id="more-cleaning---creating-helper-functions" class="section level2">
+<h2>More Cleaning - Creating Helper Functions</h2>
+<p>Now that our dataset is looking a little tidier, we’ll want to start cleaning that ‘body’ variable because it contains all of the speeches we’ll be analyzing.</p>
+<p>For our purposes we’ll want to:</p>
 <ul>
 <li>strip the html embedded into the speeches data</li>
 <li>make everything lowercase (otherwise we double up on words)</li>
@@ -131,24 +136,27 @@ speeches$candidate_name &lt;- str_replace(speeches$candidate_name, &quot; &quot;
        tm::removePunctuation() -&gt; yy 
        (gsub(&quot;\\\n&quot;, &quot; &quot;, yy))
 }</code></pre>
-<p>Ok now let’s use it.</p>
+<p>Ok now let’s use it on the speeches data.</p>
 <pre class="r"><code>speeches2 &lt;- clean_this(speeches$body)</code></pre>
 <p>Our text data should look a lot cleaner now… let’s take a look.</p>
 <pre class="r"><code>str(speeches2)</code></pre>
 <pre><code>##  chr [1:90] &quot; compliment of hunter mainland invitation faithful representation of their australian interests great honor to &quot;| __truncated__ ...</code></pre>
 </div>
-<div id="tokens-and-bigrams" class="section level2">
-<h2>Tokens and Bigrams</h2>
-<p>Cool, now that we’ve cleaned our speeches we can start to analyze visualize them. Let’s look at word pairs first.</p>
+<div id="preparing-the-data-for-visnetwork" class="section level2">
+<h2>Preparing the Data for visNetwork</h2>
+<p>Cool, now that we’ve cleaned our speeches we can start to analyze visualize them.</p>
+<p>Let’s look at word pairs first.</p>
+<p>Load the tidytext and tidyr libraries.</p>
 <pre class="r"><code>library(tidytext)
-library(tidyr)
-
-single_tokens &lt;- speeches %&gt;%
+library(tidyr)</code></pre>
+<p>Create a single_tokens variable that holds every individual word in the data ranked by count.</p>
+<pre class="r"><code>single_tokens &lt;- speeches %&gt;%
   unnest_tokens(output = word, input = body) %&gt;%
   anti_join(stop_words) %&gt;%
   count(word) %&gt;%
   rename(value = n)</code></pre>
 <pre><code>## Joining, by = &quot;word&quot;</code></pre>
+<p>Create body_bigrams2 - a variable that holds every individual pair of words, separated into “from” and “to” columns ranked by count. We’ll trim this down to word pairs that appear greater than or equal to 17 times and we’ll use dplyr and tidytext to filter out stopwords like “to”, “in”, “the” etc.</p>
 <pre class="r"><code>body_bigrams2 &lt;- speeches %&gt;%
      unnest_tokens(bigram, body, token = &quot;ngrams&quot;, n = 2) %&gt;%
      separate(bigram, c(&quot;from&quot;, &quot;to&quot;), sep = &quot; &quot;) %&gt;%
@@ -160,15 +168,14 @@ single_tokens &lt;- speeches %&gt;%
 </div>
 <div id="visualize-the-word-pairs" class="section level2">
 <h2>Visualize the Word Pairs</h2>
-<p>Let’s use our ngram and bigram data to make an interactive network graph of all of the most common word pairs in the history of Australian election speeches.</p>
-<pre class="r"><code>library(ggraph)</code></pre>
+<p>Let’s use our single_tokens and body_bigrams2 data to make an interactive network graph of the most common word pairs in the history of Australian election speeches.</p>
+<p>Load ggraph, igraph and DT.</p>
 <pre><code>## Loading required package: ggplot2</code></pre>
 <pre><code>## 
 ## Attaching package: &#39;ggplot2&#39;</code></pre>
 <pre><code>## The following object is masked from &#39;package:NLP&#39;:
 ## 
 ##     annotate</code></pre>
-<pre class="r"><code>library(igraph)</code></pre>
 <pre><code>## 
 ## Attaching package: &#39;igraph&#39;</code></pre>
 <pre><code>## The following object is masked from &#39;package:tidyr&#39;:
@@ -183,9 +190,8 @@ single_tokens &lt;- speeches %&gt;%
 <pre><code>## The following object is masked from &#39;package:base&#39;:
 ## 
 ##     union</code></pre>
-<pre class="r"><code>library(DT)
-
-body_nodes &lt;- tibble(id = unique(c(body_bigrams2$from, body_bigrams2$to)),
+<p>Create the nodes of the network.</p>
+<pre class="r"><code>body_nodes &lt;- tibble(id = unique(c(body_bigrams2$from, body_bigrams2$to)),
                         label = unique(c(body_bigrams2$from, body_bigrams2$to))) %&gt;%
                 left_join(single_tokens, by = c(id = &quot;word&quot;))</code></pre>
 <p>Last step! Let’s visualize the network…</p>
