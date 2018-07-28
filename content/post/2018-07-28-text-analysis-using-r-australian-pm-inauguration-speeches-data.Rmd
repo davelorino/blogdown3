@@ -37,7 +37,7 @@ speeches <- fromJSON("https://electionspeeches.moadoph.gov.au/api/speeches.json"
 
 Call str() on the resulting 'speeches' data.frame - i'm not going to print the output here because it's really large.
 
-Load the stringr package to join the 'candidate_name' variable into a 'Name_Surname' format instead of 'Name Surname' (R just needs things to be a certain way sometimes).  and strip the 12th column because it contains a really dense list of metadata that we aren't using. 
+Load the stringr package to join the 'candidate_name' variable into a 'Name_Surname' format instead of 'Name Surname' (R just needs things to be a certain way sometimes) and strip the 12th column because it contains a really dense list of metadata that we aren't using. 
 
 ```{r speeches}
 library(stringr)

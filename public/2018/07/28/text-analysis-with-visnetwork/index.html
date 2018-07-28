@@ -100,7 +100,7 @@ library(dplyr)</code></pre>
 <h2>Connecting to the API</h2>
 <pre class="r"><code>speeches &lt;- fromJSON(&quot;https://electionspeeches.moadoph.gov.au/api/speeches.json&quot;)</code></pre>
 <p>Call str() on the resulting ‘speeches’ data.frame - i’m not going to print the output here because it’s really large.</p>
-<p>Load the stringr package to join the ‘candidate_name’ variable into a ‘Name_Surname’ format instead of ‘Name Surname’ (R just needs things to be a certain way sometimes). and strip the 12th column because it contains a really dense list of metadata that we aren’t using.</p>
+<p>Load the stringr package to join the ‘candidate_name’ variable into a ‘Name_Surname’ format instead of ‘Name Surname’ (R just needs things to be a certain way sometimes) and strip the 12th column because it contains a really dense list of metadata that we aren’t using.</p>
 <pre class="r"><code>library(stringr)
 speeches$candidate_name &lt;- str_replace(speeches$candidate_name, &quot; &quot;, &quot;_&quot;)</code></pre>
 <p>Convert ‘candidate_name’ from a character variable to a factor variable</p>
