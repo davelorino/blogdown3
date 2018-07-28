@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>R on stoogin&#39; the net</title>
+    <title>R on data science portfolio</title>
     <link>/categories/r/</link>
-    <description>Recent content in R on stoogin&#39; the net</description>
+    <description>Recent content in R on data science portfolio</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Sat, 28 Jul 2018 00:00:00 +0000</lastBuildDate>
