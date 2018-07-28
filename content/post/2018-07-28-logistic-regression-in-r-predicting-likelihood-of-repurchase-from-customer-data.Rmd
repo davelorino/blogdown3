@@ -1,5 +1,5 @@
 ---
-title: Predicting the Amount of Time Until Reorder Using Customer Transaction Data
+title: Modelling Time Until Reorder Using Customer Transaction Data
 author: Davide Lorino
 date: '2018-07-28'
 slug: survival-analysis-in-r
