@@ -2,7 +2,7 @@
 title: 'Text Analysis with visNetwork'
 author: Davide Lorino
 date: '2018-07-28'
-slug: text-analysis-using-r-australian-pm-inauguration-speeches-data
+slug: text-analysis-with-visnetwork
 categories:
   - R
   - Data Science
