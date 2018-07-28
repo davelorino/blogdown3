@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>/2018/07/28/logistic-regression-in-r-predicting-likelihood-of-repurchase-with-customer-data/</loc>
+    <lastmod>2018-07-28T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/2018/07/28/text-analysis-with-tidytext-ggplot2-and-quanteda/</loc>
     <lastmod>2018-07-28T00:00:00+00:00</lastmod>
   </url>
