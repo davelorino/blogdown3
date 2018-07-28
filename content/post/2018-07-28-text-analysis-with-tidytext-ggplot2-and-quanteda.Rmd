@@ -165,7 +165,7 @@ Cool. Play around with the docgraph (n > 10) variable by raising and lowering n 
 
 ```{r}
 docgraph2 <- bigramcount %>%
-  filter(n > 5) %>%
+  filter(n > 9) %>%
   graph_from_data_frame()
 set.seed(2000)
 arrow <- grid::arrow(type = "closed", length = unit(.15, "inches"))
