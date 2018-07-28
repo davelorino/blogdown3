@@ -148,7 +148,7 @@ Let's use our single_tokens and body_bigrams2 data to make an interactive networ
 
 Load ggraph, igraph and DT.
 
-```{r echo = FALSE}
+```{r}
 library(ggraph)
 library(igraph)
 library(DT)
