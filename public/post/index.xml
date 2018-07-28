@@ -6,10 +6,19 @@
     <description>Recent content in Posts on stoogin&#39; the net</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 24 Jul 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 28 Jul 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Text Analysis Using R - Australian PM Inauguration Speeches Data </title>
+      <link>/2018/07/28/text-analysis-using-r-australian-pm-inauguration-speeches-data/</link>
+      <pubDate>Sat, 28 Jul 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/07/28/text-analysis-using-r-australian-pm-inauguration-speeches-data/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>Maps with R and Leaflet</title>

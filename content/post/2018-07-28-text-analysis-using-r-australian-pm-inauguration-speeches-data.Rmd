@@ -1,0 +1,155 @@
+---
+title: 'Text Analysis Using R - Australian PM Inauguration Speeches Data '
+author: Davide Lorino
+date: '2018-07-28'
+slug: text-analysis-using-r-australian-pm-inauguration-speeches-data
+categories:
+  - R
+  - Data Science
+  - Text Analysis
+tags:
+  - R
+  - Text Analysis
+  - Data Science
+---
+
+Text Analysis is growing in popularity just about everywhere - it's an abundant source of data that until recently most analysts have ignored because of it's unwieldy structure. Recent developments and packages in the R programming language have made it easy to derive significant meaning from a text corpus. 
+
+## Practical Applications of Text Analysis
+
+  - Analysing email data (e.g. from a customer service inbox to analyze       queries and feedback), 
+  - Web scraping (e.g. Cambridge Analytica, though always consider the        ethical implications of such methods even if the data is publicly         available or rightfully yours to share), 
+  - Literary analysis (e.g. poems (Shelley vs Byron) and speeches (Obama      vs Trump))
+  
+In this post we'll look at the Australian Election Speeches 1901 - 2016 dataset provided by https://electionspeeches.moadoph.gov.au/speeches - we'll connect R to their API to read the data, then we'll clean, analyze and visualize the data with some helpful R packages.
+
+```{r}
+library(jsonlite)
+library(readr)
+library(dplyr)
+```
+  
+## Connecting to the API
+
+```{r}
+speeches <- fromJSON("https://electionspeeches.moadoph.gov.au/api/speeches.json")
+```
+
+Call str() on the resulting 'speeches' data.frame - i'm not going to print the output here because it's really large.
+
+Load the stringr package to join the 'candidate_name' variable into a 'Name_Surname' format instead of 'Name Surname' (R just needs things to be a certain way sometimes).  and strip the 12th column because it contains a really dense list of metadata that we aren't using. 
+
+```{r speeches}
+library(stringr)
+speeches$candidate_name <- str_replace(speeches$candidate_name, " ", "_")
+```
+
+Convert 'candidate_name' from a character variable to a factor variable
+
+```{r}
+speeches$candidate_name <- as.factor(speeches$candidate_name)
+```
+
+And now let's remove that twelfth column in our dataset, it's just a big messy list of metadata that we aren't even using
+
+```{r}
+speeches <- speeches[,-12]
+```
+
+## Creating Helper Functions
+
+Now that our dataset is looking a little tidier, we'll want to start cleaning that 'body' variable because it contains all of the speeches we'll be analyzing. For our purposes we'll want to:
+
+  - strip the html embedded into the speeches data
+  - make everything lowercase (otherwise we double up on words)
+  - remove numbers (not always necessary, it will help us now though)
+  - remove punctuation (otherwise "word" and "word," are treated differently)
+  - remove anything annoying or unhelpful that's left over
+  
+```{r}
+
+cleanFun <- function(htmlString) {
+  return(gsub("<.*?>", "", htmlString))
+}
+```
+
+Our handy little cleanFun() function will strip 99% of the html from the body. We'll handle the rest of the html and cleaning with this next function:
+
+```{r}
+library(tm)
+
+clean_this <- function(x){
+       cleanFun(x) %>%
+       tolower() %>%
+       tm::removeNumbers() %>% 
+       tm::removePunctuation() -> yy 
+       (gsub("\\\n", " ", yy))
+}
+```
+
+Ok now let's use it.
+
+```{r}
+speeches2 <- clean_this(speeches$body)
+```
+
+Our text data should look a lot cleaner now... let's take a look.
+
+```{r}
+str(speeches2)
+```
+
+## Tokens and Bigrams
+
+Cool, now that we've cleaned our speeches we can start to analyze visualize them. Let's look at word pairs first.
+
+```{r}
+library(tidytext)
+library(tidyr)
+
+single_tokens <- speeches %>%
+  unnest_tokens(output = word, input = body) %>%
+  anti_join(stop_words) %>%
+  count(word) %>%
+  rename(value = n)
+
+body_bigrams2 <- speeches %>%
+     unnest_tokens(bigram, body, token = "ngrams", n = 2) %>%
+     separate(bigram, c("from", "to"), sep = " ") %>%
+     filter(!from %in% stop_words$word) %>%
+     filter(!to %in% stop_words$word) %>%
+     count(from, to, sort = TRUE) %>%
+     rename(size = n) %>%
+     filter(size >= 10)
+```
+
+## Visualize the Word Pairs
+
+Let's use our ngram and bigram data to make an interactive network graph of all of the most common word pairs in the history of Australian election speeches. 
+
+```{r}
+library(ggraph)
+library(igraph)
+library(DT)
+
+body_nodes <- tibble(id = unique(c(body_bigrams2$from, body_bigrams2$to)),
+                        label = unique(c(body_bigrams2$from, body_bigrams2$to))) %>%
+                left_join(single_tokens, by = c(id = "word"))
+```
+
+Last step! Let's visualize the network...
+
+```{r}
+library(visNetwork)
+
+visNetwork(body_nodes, body_bigrams2)
+```
+
+At first the map appears a little zoomed out. Zoom in with your mouse or trackpad scroll feature and explore the network, click anywhere to drag the map around and click on nodes to highlight their connections.
+
+`------------------------------------------------
+
+
+
+
+
